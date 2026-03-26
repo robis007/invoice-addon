@@ -108,6 +108,13 @@ function buildDashboard() {
             CardService.newAction().setFunctionName('onOpenTracker')
           )
       )
+      .addWidget(
+        CardService.newTextButton()
+          .setText('⚙️ Settings')
+          .setOnClickAction(
+            CardService.newAction().setFunctionName('onSettings')
+          )
+      )
   );
 
   return card.build();
