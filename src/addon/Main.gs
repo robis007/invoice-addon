@@ -45,7 +45,14 @@ function onHomepage(e) {
         )
         .addWidget(
           CardService.newTextButton()
-            .setText('🏷️ Initialize Labels')
+            .setText('🚀 Set Up Everything (Template, Folder, Tracker, Labels)')
+            .setOnClickAction(
+              CardService.newAction().setFunctionName('onRunSetup')
+            )
+        )
+        .addWidget(
+          CardService.newTextButton()
+            .setText('🏷️ Initialize Labels Only')
             .setOnClickAction(
               CardService.newAction().setFunctionName('onInitLabels')
             )
@@ -54,6 +61,103 @@ function onHomepage(e) {
     .build();
 
   return [card];
+}
+
+/**
+ * One-click setup: creates template, folder, tracker, and labels.
+ */
+function onRunSetup(e) {
+  var props = PropertiesService.getScriptProperties();
+  var created = [];
+
+  // 1. Invoice template
+  if (!props.getProperty('TEMPLATE_DOC_ID')) {
+    var templateId = createDefaultTemplate();
+    props.setProperty('TEMPLATE_DOC_ID', templateId);
+    created.push('📄 Invoice template');
+  }
+
+  // 2. Invoice folder
+  if (!props.getProperty('INVOICE_FOLDER_ID')) {
+    var folder = DriveApp.createFolder('InvoiceFly Invoices');
+    props.setProperty('INVOICE_FOLDER_ID', folder.getId());
+    created.push('📁 Invoice folder');
+  }
+
+  // 3. Tracker spreadsheet
+  if (!props.getProperty('TRACKER_SHEET_ID')) {
+    var sheetId = initializeTracker();
+    created.push('📊 Invoice tracker');
+  }
+
+  // 4. Gmail labels
+  initializeLabels();
+  created.push('🏷️ Gmail labels');
+
+  var summary = created.length > 0
+    ? 'Created:\n' + created.join('\n')
+    : 'Everything was already set up!';
+
+  // Show confirmation with links
+  var card = CardService.newCardBuilder()
+    .setHeader(
+      CardService.newCardHeader()
+        .setTitle('✅ Setup Complete!')
+    )
+    .addSection(
+      CardService.newCardSection()
+        .addWidget(
+          CardService.newTextParagraph().setText(summary)
+        )
+    )
+    .addSection(
+      CardService.newCardSection()
+        .setHeader('Your Resources')
+        .addWidget(
+          CardService.newTextButton()
+            .setText('📄 Open Invoice Template')
+            .setOpenLink(
+              CardService.newOpenLink()
+                .setUrl('https://docs.google.com/document/d/' + props.getProperty('TEMPLATE_DOC_ID') + '/edit')
+            )
+        )
+        .addWidget(
+          CardService.newTextButton()
+            .setText('📁 Open Invoice Folder')
+            .setOpenLink(
+              CardService.newOpenLink()
+                .setUrl('https://drive.google.com/drive/folders/' + props.getProperty('INVOICE_FOLDER_ID'))
+            )
+        )
+        .addWidget(
+          CardService.newTextButton()
+            .setText('📊 Open Invoice Tracker')
+            .setOpenLink(
+              CardService.newOpenLink()
+                .setUrl('https://docs.google.com/spreadsheets/d/' + props.getProperty('TRACKER_SHEET_ID') + '/edit')
+            )
+        )
+    )
+    .addSection(
+      CardService.newCardSection()
+        .addWidget(
+          CardService.newTextParagraph()
+            .setText('💡 Tip: Customize the template by editing the Google Doc. ' +
+                     'Just keep the {{PLACEHOLDERS}} intact — they get replaced with real data.')
+        )
+        .addWidget(
+          CardService.newTextButton()
+            .setText('⚙️ Configure Business Info')
+            .setOnClickAction(
+              CardService.newAction().setFunctionName('onSettings')
+            )
+        )
+    )
+    .build();
+
+  return CardService.newActionResponseBuilder()
+    .setNavigation(CardService.newNavigation().pushCard(card))
+    .build();
 }
 
 /**
