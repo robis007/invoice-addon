@@ -35,7 +35,6 @@
     "common": {
       "name": "InvoiceFly",
       "logoUrl": "https://www.gstatic.com/images/branding/product/1x/apps_script_48dp.png",
-      "useLocaleFromApp": true,
       "homepageTrigger": {
         "runFunction": "onHomepage"
       },
