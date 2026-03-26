@@ -1,207 +1,270 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<style>
-  body {
-    font-family: Arial, sans-serif;
-    color: #1E293B;
-    max-width: 700px;
-    margin: 0 auto;
-    padding: 40px;
-    font-size: 11pt;
-    line-height: 1.5;
-  }
-  h1 {
-    font-size: 28pt;
-    color: #2563EB;
-    margin: 0 0 6px 0;
-    letter-spacing: -0.5px;
-  }
-  .meta-table {
-    width: 100%;
-    margin-bottom: 24px;
-  }
-  .meta-table td {
-    vertical-align: top;
-    padding: 2px 0;
-  }
-  .meta-label {
-    color: #64748B;
-    width: 100px;
-  }
-  .separator {
-    border: none;
-    border-top: 2px solid #E2E8F0;
-    margin: 20px 0;
-  }
-  .section-label {
-    font-size: 8pt;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 2px;
-    color: #94A3B8;
-    margin: 18px 0 8px 0;
-  }
-  .party-name {
-    font-size: 13pt;
-    font-weight: bold;
-    margin-bottom: 3px;
-  }
-  .party-detail {
-    color: #64748B;
-    font-size: 10pt;
-    line-height: 1.7;
-  }
-  .items-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 10px 0 20px 0;
-  }
-  .items-table th {
-    text-align: left;
-    font-size: 8pt;
-    font-weight: bold;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: #94A3B8;
-    padding: 8px 10px;
-    border-bottom: 2px solid #E2E8F0;
-  }
-  .items-table th.right {
-    text-align: right;
-  }
-  .items-table td {
-    padding: 10px;
-    border-bottom: 1px solid #F1F5F9;
-    font-size: 10pt;
-  }
-  .items-table td.right {
-    text-align: right;
-  }
-  .totals-table {
-    width: 250px;
-    margin-left: auto;
-    margin-bottom: 20px;
-  }
-  .totals-table td {
-    padding: 5px 0;
-    font-size: 10pt;
-  }
-  .totals-table .label {
-    color: #64748B;
-  }
-  .totals-table .value {
-    text-align: right;
-  }
-  .totals-table .grand-label {
-    font-size: 13pt;
-    font-weight: bold;
-    color: #2563EB;
-    padding-top: 10px;
-    border-top: 2px solid #2563EB;
-  }
-  .totals-table .grand-value {
-    font-size: 13pt;
-    font-weight: bold;
-    color: #2563EB;
-    text-align: right;
-    padding-top: 10px;
-    border-top: 2px solid #2563EB;
-  }
-  .notes {
-    color: #64748B;
-    font-size: 10pt;
-  }
-  .footer {
-    text-align: center;
-    color: #CBD5E1;
-    font-size: 8pt;
-    margin-top: 30px;
-    padding-top: 15px;
-    border-top: 1px solid #F1F5F9;
-  }
-</style>
+  <meta charset="UTF-8">
+  <title>Invoice {{INVOICE_NUMBER}}</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, Arial, sans-serif;
+      color: #1E293B;
+      background: #fff;
+      max-width: 800px;
+      margin: 0 auto;
+      padding: 40px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      margin-bottom: 50px;
+      padding-bottom: 30px;
+      border-bottom: 3px solid #2563EB;
+    }
+    .header-left h1 {
+      font-size: 36px;
+      font-weight: 700;
+      color: #2563EB;
+      letter-spacing: -0.5px;
+    }
+    .header-right { text-align: right; }
+    .invoice-number {
+      font-size: 22px;
+      font-weight: 700;
+      color: #1E293B;
+    }
+    .invoice-date {
+      font-size: 13px;
+      color: #64748B;
+      margin-top: 4px;
+    }
+
+    .parties {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 45px;
+    }
+    .party { width: 45%; }
+    .party-label {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #94A3B8;
+      margin-bottom: 10px;
+    }
+    .party-name {
+      font-size: 16px;
+      font-weight: 600;
+      color: #1E293B;
+      margin-bottom: 4px;
+    }
+    .party-detail {
+      font-size: 12px;
+      color: #64748B;
+      line-height: 1.6;
+    }
+
+    .items-table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 30px;
+    }
+    .items-table thead th {
+      text-align: left;
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94A3B8;
+      padding: 12px 16px;
+      border-bottom: 2px solid #E2E8F0;
+    }
+    .items-table thead th:last-child,
+    .items-table thead th:nth-child(2),
+    .items-table thead th:nth-child(3) {
+      text-align: right;
+    }
+    .items-table tbody td {
+      padding: 14px 16px;
+      font-size: 13px;
+      border-bottom: 1px solid #F1F5F9;
+    }
+    .items-table tbody td:last-child,
+    .items-table tbody td:nth-child(2),
+    .items-table tbody td:nth-child(3) {
+      text-align: right;
+    }
+    .items-table tbody tr:nth-child(even) {
+      background: #F8FAFC;
+    }
+    .item-description {
+      font-weight: 500;
+      color: #1E293B;
+    }
+
+    .totals-section {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 45px;
+    }
+    .totals-box { width: 280px; }
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 8px 0;
+      font-size: 13px;
+      color: #64748B;
+    }
+    .totals-row .label { font-weight: 500; }
+    .totals-row .value {
+      color: #1E293B;
+    }
+    .totals-divider {
+      border-top: 1px solid #E2E8F0;
+      margin: 6px 0;
+    }
+    .totals-grand {
+      display: flex;
+      justify-content: space-between;
+      padding: 14px 18px;
+      background: #2563EB;
+      border-radius: 8px;
+      margin-top: 8px;
+    }
+    .totals-grand .label {
+      font-size: 14px;
+      font-weight: 700;
+      color: #fff;
+    }
+    .totals-grand .value {
+      font-size: 18px;
+      font-weight: 700;
+      color: #fff;
+    }
+
+    .footer-sections {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 40px;
+    }
+    .footer-section { flex: 1; }
+    .footer-section-title {
+      font-size: 10px;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      color: #94A3B8;
+      margin-bottom: 10px;
+    }
+    .footer-section-content {
+      font-size: 12px;
+      color: #64748B;
+      line-height: 1.7;
+    }
+    .bank-detail { display: flex; gap: 8px; }
+    .bank-detail .label {
+      font-weight: 600;
+      color: #475569;
+      min-width: 60px;
+    }
+
+    .powered-by {
+      text-align: center;
+      padding-top: 30px;
+      border-top: 1px solid #F1F5F9;
+      font-size: 10px;
+      color: #CBD5E1;
+    }
+  </style>
 </head>
 <body>
 
-<h1>INVOICE</h1>
+  <div class="header">
+    <div class="header-left">
+      <h1>{{BUSINESS_NAME}}</h1>
+    </div>
+    <div class="header-right">
+      <div class="invoice-number">{{INVOICE_NUMBER}}</div>
+      <div class="invoice-date">Issued: {{DATE}}</div>
+      <div class="invoice-date">Due: {{DUE_DATE}}</div>
+    </div>
+  </div>
 
-<table class="meta-table">
-  <tr><td class="meta-label">Invoice #:</td><td><strong>{{INVOICE_NUMBER}}</strong></td></tr>
-  <tr><td class="meta-label">Date:</td><td>{{DATE}}</td></tr>
-  <tr><td class="meta-label">Due Date:</td><td>{{DUE_DATE}}</td></tr>
-</table>
-
-<hr class="separator">
-
-<table style="width:100%">
-  <tr>
-    <td style="width:50%; vertical-align:top;">
-      <div class="section-label">FROM</div>
+  <div class="parties">
+    <div class="party">
+      <div class="party-label">From</div>
       <div class="party-name">{{BUSINESS_NAME}}</div>
       <div class="party-detail">
         {{BUSINESS_EMAIL}}<br>
         {{BUSINESS_ADDRESS}}<br>
         VAT: {{TAX_ID}}
       </div>
-    </td>
-    <td style="width:50%; vertical-align:top;">
-      <div class="section-label">BILL TO</div>
+    </div>
+    <div class="party">
+      <div class="party-label">Bill To</div>
       <div class="party-name">{{CLIENT_NAME}}</div>
       <div class="party-detail">
         {{CLIENT_EMAIL}}<br>
         {{CLIENT_ADDRESS}}
       </div>
-    </td>
-  </tr>
-</table>
+    </div>
+  </div>
 
-<hr class="separator">
+  <table class="items-table">
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th>Qty</th>
+        <th>Unit Price</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <tr>
+        <td colspan="4">{{ITEMS}}</td>
+      </tr>
+    </tbody>
+  </table>
 
-<div class="section-label">ITEMS</div>
+  <div class="totals-section">
+    <div class="totals-box">
+      <div class="totals-row">
+        <span class="label">Subtotal</span>
+        <span class="value">{{CURRENCY}} {{SUBTOTAL}}</span>
+      </div>
+      <div class="totals-row">
+        <span class="label">Tax</span>
+        <span class="value">{{CURRENCY}} {{TAX}}</span>
+      </div>
+      <div class="totals-divider"></div>
+      <div class="totals-grand">
+        <span class="label">Total Due</span>
+        <span class="value">{{CURRENCY}} {{TOTAL}}</span>
+      </div>
+    </div>
+  </div>
 
-<table class="items-table">
-  <thead>
-    <tr>
-      <th>Description</th>
-      <th class="right">Qty</th>
-      <th class="right">Unit Price</th>
-      <th class="right">Total</th>
-    </tr>
-  </thead>
-  <tbody>
-    <tr>
-      <td colspan="4">{{ITEMS}}</td>
-    </tr>
-  </tbody>
-</table>
+  <div class="footer-sections">
+    <div class="footer-section">
+      <div class="footer-section-title">Payment Details</div>
+      <div class="footer-section-content">
+        Payment terms: Net {{PAYMENT_TERMS}} days
+      </div>
+    </div>
+    <div class="footer-section">
+      <div class="footer-section-title">Notes</div>
+      <div class="footer-section-content">
+        {{NOTES}}
+      </div>
+    </div>
+  </div>
 
-<table class="totals-table">
-  <tr>
-    <td class="label">Subtotal</td>
-    <td class="value">{{CURRENCY}} {{SUBTOTAL}}</td>
-  </tr>
-  <tr>
-    <td class="label">Tax</td>
-    <td class="value">{{CURRENCY}} {{TAX}}</td>
-  </tr>
-  <tr>
-    <td class="grand-label">TOTAL DUE</td>
-    <td class="grand-value">{{CURRENCY}} {{TOTAL}}</td>
-  </tr>
-</table>
-
-<hr class="separator">
-
-<div class="section-label">PAYMENT</div>
-<div class="party-detail">Payment terms: Net {{PAYMENT_TERMS}} days</div>
-
-<br>
-
-<div class="section-label">NOTES</div>
-<div class="notes">{{NOTES}}</div>
-
-<div class="footer">Generated by InvoiceFly</div>
+  <div class="powered-by">
+    Generated by InvoiceFly
+  </div>
 
 </body>
 </html>
