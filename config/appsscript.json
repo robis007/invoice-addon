@@ -3,19 +3,41 @@
   "dependencies": {},
   "exceptionLogging": "STACKDRIVER",
   "runtimeVersion": "V8",
+  "webapp": {
+    "access": "MYSELF",
+    "executeAs": "USER_ACCESSING"
+  },
   "oauthScopes": [
     "https://www.googleapis.com/auth/gmail.readonly",
     "https://www.googleapis.com/auth/gmail.labels",
     "https://www.googleapis.com/auth/gmail.modify",
+    "https://www.googleapis.com/auth/gmail.send",
     "https://www.googleapis.com/auth/documents",
+    "https://www.googleapis.com/auth/drive",
     "https://www.googleapis.com/auth/drive.file",
+    "https://www.googleapis.com/auth/spreadsheets",
     "https://www.googleapis.com/auth/script.external_request",
-    "https://www.googleapis.com/auth/script.send_mail"
+    "https://www.googleapis.com/auth/script.scriptapp",
+    "https://mail.google.com/"
   ],
   "addOns": {
     "common": {
       "name": "InvoiceFly",
-      "logoUrl": "https://via.placeholder.com/128?text=IF",
+      "logoUrl": "https://www.gstatic.com/images/branding/product/1x/apps_script_48dp.png",
+      "useLocaleFromApp": true,
+      "homepageTrigger": {
+        "runFunction": "onHomepage"
+      },
+      "universalActions": [
+        {
+          "label": "Settings",
+          "runFunction": "onSettings"
+        },
+        {
+          "label": "Dashboard",
+          "runFunction": "onHomepage"
+        }
+      ],
       "layoutProperties": {
         "primaryColor": "#2563EB",
         "secondaryColor": "#1E40AF"
