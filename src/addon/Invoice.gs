@@ -173,177 +173,23 @@ function createInvoice(data) {
 
 /**
  * Create a professional default invoice template in Google Docs.
- * Called automatically when no template is configured.
+ * Uses the bundled TemplateHtml.html file — uploaded as HTML and
+ * converted to Google Docs format via the Drive API.
  */
 function createDefaultTemplate() {
-  var doc = DocumentApp.create('InvoiceFly — Invoice Template');
-  var body = doc.getBody();
+  var html = HtmlService.createHtmlOutputFromFile('TemplateHtml').getContent();
 
-  // Set default font
-  body.setAttributes({
-    'FONT_FAMILY': 'Arial',
-    'FONT_SIZE': 10
-  });
+  var blob = Utilities.newBlob(html, 'text/html', 'InvoiceFly — Invoice Template.html');
 
-  // ═══ HEADER ═══
-  var header = body.appendParagraph('INVOICE');
-  header.setHeading(DocumentApp.ParagraphHeading.HEADING1);
-  header.setAlignment(DocumentApp.HorizontalAlignment.LEFT);
-  header.setAttributes({
-    'FONT_SIZE': 28,
-    'BOLD': true,
-    'FOREGROUND_COLOR': '#2563EB',
-    'FONT_FAMILY': 'Arial'
-  });
+  var resource = {
+    title: 'InvoiceFly — Invoice Template',
+    mimeType: 'application/vnd.google-apps.document'
+  };
 
-  body.appendParagraph('');
+  var file = Drive.Files.insert(resource, blob, { convert: true });
 
-  // Invoice meta
-  var meta = body.appendParagraph('Invoice #:  {{INVOICE_NUMBER}}');
-  meta.setAttributes({ 'FONT_SIZE': 11, 'FONT_FAMILY': 'Arial' });
-
-  var dateLine = body.appendParagraph('Date:           {{DATE}}');
-  dateLine.setAttributes({ 'FONT_SIZE': 11, 'FONT_FAMILY': 'Arial' });
-
-  var dueLine = body.appendParagraph('Due Date:   {{DUE_DATE}}');
-  dueLine.setAttributes({ 'FONT_SIZE': 11, 'FONT_FAMILY': 'Arial' });
-
-  body.appendParagraph('');
-
-  // ═══ SEPARATOR ═══
-  appendSeparator(body);
-
-  // ═══ FROM ═══
-  var fromLabel = body.appendParagraph('FROM');
-  fromLabel.setAttributes({
-    'FONT_SIZE': 9,
-    'BOLD': true,
-    'FOREGROUND_COLOR': '#94A3B8',
-    'FONT_FAMILY': 'Arial'
-  });
-
-  body.appendParagraph('{{BUSINESS_NAME}}').setAttributes({ 'FONT_SIZE': 12, 'BOLD': true, 'FONT_FAMILY': 'Arial' });
-  body.appendParagraph('{{BUSINESS_EMAIL}}').setAttributes({ 'FONT_SIZE': 10, 'FOREGROUND_COLOR': '#64748B', 'FONT_FAMILY': 'Arial' });
-  body.appendParagraph('{{BUSINESS_ADDRESS}}').setAttributes({ 'FONT_SIZE': 10, 'FOREGROUND_COLOR': '#64748B', 'FONT_FAMILY': 'Arial' });
-  body.appendParagraph('VAT: {{TAX_ID}}').setAttributes({ 'FONT_SIZE': 10, 'FOREGROUND_COLOR': '#64748B', 'FONT_FAMILY': 'Arial' });
-
-  body.appendParagraph('');
-
-  // ═══ BILL TO ═══
-  var toLabel = body.appendParagraph('BILL TO');
-  toLabel.setAttributes({
-    'FONT_SIZE': 9,
-    'BOLD': true,
-    'FOREGROUND_COLOR': '#94A3B8',
-    'FONT_FAMILY': 'Arial'
-  });
-
-  body.appendParagraph('{{CLIENT_NAME}}').setAttributes({ 'FONT_SIZE': 12, 'BOLD': true, 'FONT_FAMILY': 'Arial' });
-  body.appendParagraph('{{CLIENT_EMAIL}}').setAttributes({ 'FONT_SIZE': 10, 'FOREGROUND_COLOR': '#64748B', 'FONT_FAMILY': 'Arial' });
-  body.appendParagraph('{{CLIENT_ADDRESS}}').setAttributes({ 'FONT_SIZE': 10, 'FOREGROUND_COLOR': '#64748B', 'FONT_FAMILY': 'Arial' });
-
-  body.appendParagraph('');
-
-  // ═══ ITEMS ═══
-  appendSeparator(body);
-
-  var itemsLabel = body.appendParagraph('ITEMS');
-  itemsLabel.setAttributes({
-    'FONT_SIZE': 9,
-    'BOLD': true,
-    'FOREGROUND_COLOR': '#94A3B8',
-    'FONT_FAMILY': 'Arial'
-  });
-
-  body.appendParagraph('');
-  body.appendParagraph('{{ITEMS}}').setAttributes({ 'FONT_SIZE': 10, 'FONT_FAMILY': 'Arial' });
-  body.appendParagraph('');
-
-  // ═══ TOTALS ═══
-  appendSeparator(body);
-
-  body.appendParagraph('');
-
-  var subtotal = body.appendParagraph('Subtotal:                    {{CURRENCY}}  {{SUBTOTAL}}');
-  subtotal.setAttributes({ 'FONT_SIZE': 11, 'FONT_FAMILY': 'Arial' });
-  subtotal.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
-
-  var tax = body.appendParagraph('Tax:                              {{CURRENCY}}  {{TAX}}');
-  tax.setAttributes({ 'FONT_SIZE': 11, 'FONT_FAMILY': 'Arial' });
-  tax.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
-
-  body.appendParagraph('');
-
-  var total = body.appendParagraph('TOTAL DUE:              {{CURRENCY}}  {{TOTAL}}');
-  total.setAttributes({
-    'FONT_SIZE': 14,
-    'BOLD': true,
-    'FOREGROUND_COLOR': '#2563EB',
-    'FONT_FAMILY': 'Arial'
-  });
-  total.setAlignment(DocumentApp.HorizontalAlignment.RIGHT);
-
-  body.appendParagraph('');
-
-  // ═══ PAYMENT TERMS ═══
-  appendSeparator(body);
-
-  var payLabel = body.appendParagraph('PAYMENT');
-  payLabel.setAttributes({
-    'FONT_SIZE': 9,
-    'BOLD': true,
-    'FOREGROUND_COLOR': '#94A3B8',
-    'FONT_FAMILY': 'Arial'
-  });
-
-  body.appendParagraph('Payment terms: Net {{PAYMENT_TERMS}} days').setAttributes({
-    'FONT_SIZE': 10, 'FOREGROUND_COLOR': '#64748B', 'FONT_FAMILY': 'Arial'
-  });
-
-  body.appendParagraph('');
-
-  // ═══ NOTES ═══
-  var notesLabel = body.appendParagraph('NOTES');
-  notesLabel.setAttributes({
-    'FONT_SIZE': 9,
-    'BOLD': true,
-    'FOREGROUND_COLOR': '#94A3B8',
-    'FONT_FAMILY': 'Arial'
-  });
-
-  body.appendParagraph('{{NOTES}}').setAttributes({
-    'FONT_SIZE': 10, 'FOREGROUND_COLOR': '#64748B', 'FONT_FAMILY': 'Arial'
-  });
-
-  body.appendParagraph('');
-
-  // ═══ FOOTER ═══
-  appendSeparator(body);
-
-  var footer = body.appendParagraph('Generated by InvoiceFly');
-  footer.setAttributes({
-    'FONT_SIZE': 8,
-    'FOREGROUND_COLOR': '#CBD5E1',
-    'FONT_FAMILY': 'Arial'
-  });
-  footer.setAlignment(DocumentApp.HorizontalAlignment.CENTER);
-
-  doc.saveAndClose();
-
-  Logger.log('Default template created: ' + doc.getId());
-  return doc.getId();
-}
-
-/**
- * Append a horizontal separator line.
- */
-function appendSeparator(body) {
-  var sep = body.appendParagraph('━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━');
-  sep.setAttributes({
-    'FONT_SIZE': 6,
-    'FOREGROUND_COLOR': '#E2E8F0',
-    'FONT_FAMILY': 'Arial'
-  });
+  Logger.log('Default template created from HTML: ' + file.id);
+  return file.id;
 }
 
 /**
