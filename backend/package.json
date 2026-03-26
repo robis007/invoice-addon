@@ -1,0 +1,21 @@
+{
+  "name": "invoicefly-backend",
+  "version": "1.0.0",
+  "description": "InvoiceFly Cloud Run backend — AI email parsing & invoice generation",
+  "main": "src/index.js",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "node --watch src/index.js",
+    "test": "node --test test/*.test.js"
+  },
+  "dependencies": {
+    "@google-cloud/vertexai": "^1.9.0",
+    "express": "^4.21.0",
+    "pdfkit": "^0.15.0",
+    "helmet": "^8.0.0",
+    "cors": "^2.8.5"
+  },
+  "engines": {
+    "node": ">=20"
+  }
+}
