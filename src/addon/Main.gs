@@ -70,27 +70,47 @@ function onRunSetup(e) {
   var props = PropertiesService.getScriptProperties();
   var created = [];
 
-  // 1. Invoice template
+  // 1. Create parent folder: "InvoiceFly"
+  var parentFolderId = props.getProperty('PARENT_FOLDER_ID');
+  var parentFolder;
+  if (!parentFolderId) {
+    parentFolder = DriveApp.createFolder('InvoiceFly');
+    parentFolderId = parentFolder.getId();
+    props.setProperty('PARENT_FOLDER_ID', parentFolderId);
+    created.push('📂 InvoiceFly folder');
+  } else {
+    parentFolder = DriveApp.getFolderById(parentFolderId);
+  }
+
+  // 2. Invoice template (inside InvoiceFly/)
   if (!props.getProperty('TEMPLATE_DOC_ID')) {
     var templateId = createDefaultTemplate();
+    // Move template into parent folder
+    var templateFile = DriveApp.getFileById(templateId);
+    parentFolder.addFile(templateFile);
+    DriveApp.getRootFolder().removeFile(templateFile);
     props.setProperty('TEMPLATE_DOC_ID', templateId);
     created.push('📄 Invoice template');
   }
 
-  // 2. Invoice folder
+  // 3. Invoices subfolder (InvoiceFly/Invoices/)
   if (!props.getProperty('INVOICE_FOLDER_ID')) {
-    var folder = DriveApp.createFolder('InvoiceFly Invoices');
-    props.setProperty('INVOICE_FOLDER_ID', folder.getId());
-    created.push('📁 Invoice folder');
+    var invoicesFolder = parentFolder.createFolder('Invoices');
+    props.setProperty('INVOICE_FOLDER_ID', invoicesFolder.getId());
+    created.push('📁 Invoices folder');
   }
 
-  // 3. Tracker spreadsheet
+  // 4. Tracker spreadsheet (inside InvoiceFly/)
   if (!props.getProperty('TRACKER_SHEET_ID')) {
     var sheetId = initializeTracker();
+    // Move tracker into parent folder
+    var trackerFile = DriveApp.getFileById(sheetId);
+    parentFolder.addFile(trackerFile);
+    DriveApp.getRootFolder().removeFile(trackerFile);
     created.push('📊 Invoice tracker');
   }
 
-  // 4. Gmail labels
+  // 5. Gmail labels
   initializeLabels();
   created.push('🏷️ Gmail labels');
 
@@ -115,6 +135,14 @@ function onRunSetup(e) {
         .setHeader('Your Resources')
         .addWidget(
           CardService.newTextButton()
+            .setText('📂 Open InvoiceFly Folder')
+            .setOpenLink(
+              CardService.newOpenLink()
+                .setUrl('https://drive.google.com/drive/folders/' + props.getProperty('PARENT_FOLDER_ID'))
+            )
+        )
+        .addWidget(
+          CardService.newTextButton()
             .setText('📄 Open Invoice Template')
             .setOpenLink(
               CardService.newOpenLink()
@@ -123,7 +151,7 @@ function onRunSetup(e) {
         )
         .addWidget(
           CardService.newTextButton()
-            .setText('📁 Open Invoice Folder')
+            .setText('📁 Open Invoices Folder')
             .setOpenLink(
               CardService.newOpenLink()
                 .setUrl('https://drive.google.com/drive/folders/' + props.getProperty('INVOICE_FOLDER_ID'))

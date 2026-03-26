@@ -84,20 +84,34 @@ function createInvoice(data) {
   var invoiceNum = generateInvoiceNumber();
   data.invoiceNumber = invoiceNum;
 
-  // Get or create template
+  // Get or create parent folder
+  var parentFolderId = props.getProperty('PARENT_FOLDER_ID');
+  var parentFolder;
+  if (!parentFolderId) {
+    parentFolder = DriveApp.createFolder('InvoiceFly');
+    parentFolderId = parentFolder.getId();
+    props.setProperty('PARENT_FOLDER_ID', parentFolderId);
+  } else {
+    parentFolder = DriveApp.getFolderById(parentFolderId);
+  }
+
+  // Get or create template (inside InvoiceFly/)
   var templateDocId = props.getProperty('TEMPLATE_DOC_ID');
   if (!templateDocId) {
     templateDocId = createDefaultTemplate();
+    var templateFile = DriveApp.getFileById(templateDocId);
+    parentFolder.addFile(templateFile);
+    DriveApp.getRootFolder().removeFile(templateFile);
     props.setProperty('TEMPLATE_DOC_ID', templateDocId);
   }
 
-  // Get or create invoice folder
+  // Get or create invoices subfolder (InvoiceFly/Invoices/)
   var folderId = props.getProperty('INVOICE_FOLDER_ID');
   var folder;
   if (folderId) {
     folder = DriveApp.getFolderById(folderId);
   } else {
-    folder = DriveApp.createFolder('InvoiceFly Invoices');
+    folder = parentFolder.createFolder('Invoices');
     props.setProperty('INVOICE_FOLDER_ID', folder.getId());
   }
 
