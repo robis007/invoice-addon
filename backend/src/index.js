@@ -7,6 +7,7 @@ const helmet = require('helmet');
 const cors = require('cors');
 const parseRoutes = require('./routes/parse');
 const pdfRoutes = require('./routes/pdf');
+const previewRoutes = require('./routes/preview');
 const healthRoutes = require('./routes/health');
 
 const app = express();
@@ -21,6 +22,7 @@ app.use(express.json({ limit: '1mb' }));
 app.use('/health', healthRoutes);
 app.use('/parse', parseRoutes);
 app.use('/pdf', pdfRoutes);
+app.use('/preview', previewRoutes);
 
 // Error handler
 app.use((err, req, res, next) => {
