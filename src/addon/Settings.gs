@@ -72,30 +72,43 @@ function onSettings(e) {
     )
     .addSection(
       CardService.newCardSection()
-        .setHeader('Connections')
+        .setHeader('AI Parsing')
+        .addWidget(
+          CardService.newTextParagraph()
+            .setText('Add a Gemini API key for AI-powered email parsing. ' +
+                     'Without it, basic regex parsing is used.\n' +
+                     'Get a free key at: aistudio.google.com/apikey')
+        )
         .addWidget(
           CardService.newTextInput()
-            .setFieldName('backendUrl')
-            .setTitle('Backend URL (Cloud Run)')
-            .setValue(props.getProperty('BACKEND_URL') || '')
+            .setFieldName('geminiApiKey')
+            .setTitle('Gemini API Key')
+            .setValue(props.getProperty('GEMINI_API_KEY') ? '••••••••' + props.getProperty('GEMINI_API_KEY').slice(-4) : '')
         )
+    )
+    .addSection(
+      CardService.newCardSection()
+        .setHeader('Connections')
         .addWidget(
           CardService.newTextInput()
             .setFieldName('templateDocId')
             .setTitle('Invoice Template (Google Doc ID)')
             .setValue(props.getProperty('TEMPLATE_DOC_ID') || '')
+            .setHint('Leave empty to auto-create')
         )
         .addWidget(
           CardService.newTextInput()
             .setFieldName('invoiceFolderId')
             .setTitle('Invoice Folder (Google Drive ID)')
             .setValue(props.getProperty('INVOICE_FOLDER_ID') || '')
+            .setHint('Leave empty to auto-create')
         )
         .addWidget(
           CardService.newTextInput()
             .setFieldName('trackerSheetId')
             .setTitle('Invoice Tracker (Google Sheet ID)')
             .setValue(props.getProperty('TRACKER_SHEET_ID') || '')
+            .setHint('Leave empty to auto-create')
         )
     )
     .addSection(
@@ -130,7 +143,6 @@ function onSaveSettings(e) {
     'DEFAULT_CURRENCY': 'defaultCurrency',
     'DEFAULT_TAX_RATE': 'defaultTaxRate',
     'PAYMENT_TERMS': 'paymentTerms',
-    'BACKEND_URL': 'backendUrl',
     'TEMPLATE_DOC_ID': 'templateDocId',
     'INVOICE_FOLDER_ID': 'invoiceFolderId',
     'TRACKER_SHEET_ID': 'trackerSheetId'
@@ -140,9 +152,19 @@ function onSaveSettings(e) {
     var formKey = fields[propKey];
     if (inputs[formKey]) {
       var value = inputs[formKey];
-      // Handle both string and array values from form
       if (Array.isArray(value)) value = value[0];
       props.setProperty(propKey, String(value));
+    }
+  }
+
+  // Handle Gemini API key separately (don't overwrite with masked value)
+  if (inputs['geminiApiKey']) {
+    var keyValue = inputs['geminiApiKey'];
+    if (Array.isArray(keyValue)) keyValue = keyValue[0];
+    keyValue = String(keyValue);
+    // Only save if it's a real key (not the masked display)
+    if (keyValue && !keyValue.startsWith('••')) {
+      props.setProperty('GEMINI_API_KEY', keyValue);
     }
   }
 
