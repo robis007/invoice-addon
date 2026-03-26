@@ -120,6 +120,13 @@ function onSettings(e) {
               CardService.newAction().setFunctionName('onSaveSettings')
             )
         )
+        .addWidget(
+          CardService.newTextButton()
+            .setText('🗑️ Reset All Settings & Re-run Setup')
+            .setOnClickAction(
+              CardService.newAction().setFunctionName('onResetAll')
+            )
+        )
     )
     .build();
 
@@ -173,6 +180,26 @@ function onSaveSettings(e) {
       CardService.newNotification().setText('✅ Settings saved!')
     )
     .build();
+}
+
+/**
+ * Reset all stored resource IDs and re-run setup.
+ * Business settings (name, email, etc.) are preserved.
+ */
+function onResetAll(e) {
+  var props = PropertiesService.getScriptProperties();
+
+  // Clear resource IDs (but keep business info and API keys)
+  var keysToDelete = [
+    'PARENT_FOLDER_ID', 'TEMPLATE_DOC_ID', 'INVOICE_FOLDER_ID',
+    'TRACKER_SHEET_ID', 'LAST_INVOICE_NUM', 'RECURRING_INVOICES'
+  ];
+  keysToDelete.forEach(function(key) {
+    props.deleteProperty(key);
+  });
+
+  // Run setup fresh
+  return onRunSetup(e);
 }
 
 /**

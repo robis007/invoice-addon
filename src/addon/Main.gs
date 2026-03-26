@@ -9,11 +9,15 @@
  * Shows the dashboard if tracker exists, otherwise shows onboarding.
  */
 function onHomepage(e) {
-  var sheetId = PropertiesService.getScriptProperties().getProperty('TRACKER_SHEET_ID');
+  var props = PropertiesService.getScriptProperties();
+  var sheetId = props.getProperty('TRACKER_SHEET_ID');
 
-  if (sheetId) {
-    // Show dashboard
+  // Verify tracker still exists, clear stale ID if not
+  if (sheetId && fileExists(sheetId)) {
     return [buildDashboard()];
+  } else if (sheetId) {
+    // Stale ID — file was deleted
+    props.deleteProperty('TRACKER_SHEET_ID');
   }
 
   // Onboarding / quick actions
@@ -70,22 +74,26 @@ function onRunSetup(e) {
   var props = PropertiesService.getScriptProperties();
   var created = [];
 
-  // 1. Create parent folder: "InvoiceFly"
+  // 1. Create or verify parent folder: "InvoiceFly"
   var parentFolderId = props.getProperty('PARENT_FOLDER_ID');
   var parentFolder;
-  if (!parentFolderId) {
+  if (!parentFolderId || !fileExists(parentFolderId)) {
     parentFolder = DriveApp.createFolder('InvoiceFly');
     parentFolderId = parentFolder.getId();
     props.setProperty('PARENT_FOLDER_ID', parentFolderId);
+    // Clear child IDs since parent is new
+    props.deleteProperty('TEMPLATE_DOC_ID');
+    props.deleteProperty('INVOICE_FOLDER_ID');
+    props.deleteProperty('TRACKER_SHEET_ID');
     created.push('📂 InvoiceFly folder');
   } else {
     parentFolder = DriveApp.getFolderById(parentFolderId);
   }
 
   // 2. Invoice template (inside InvoiceFly/)
-  if (!props.getProperty('TEMPLATE_DOC_ID')) {
-    var templateId = createDefaultTemplate();
-    // Move template into parent folder
+  var templateId = props.getProperty('TEMPLATE_DOC_ID');
+  if (!templateId || !fileExists(templateId)) {
+    templateId = createDefaultTemplate();
     var templateFile = DriveApp.getFileById(templateId);
     parentFolder.addFile(templateFile);
     DriveApp.getRootFolder().removeFile(templateFile);
@@ -94,16 +102,17 @@ function onRunSetup(e) {
   }
 
   // 3. Invoices subfolder (InvoiceFly/Invoices/)
-  if (!props.getProperty('INVOICE_FOLDER_ID')) {
+  var invoiceFolderId = props.getProperty('INVOICE_FOLDER_ID');
+  if (!invoiceFolderId || !fileExists(invoiceFolderId)) {
     var invoicesFolder = parentFolder.createFolder('Invoices');
     props.setProperty('INVOICE_FOLDER_ID', invoicesFolder.getId());
     created.push('📁 Invoices folder');
   }
 
   // 4. Tracker spreadsheet (inside InvoiceFly/)
-  if (!props.getProperty('TRACKER_SHEET_ID')) {
+  var trackerId = props.getProperty('TRACKER_SHEET_ID');
+  if (!trackerId || !fileExists(trackerId)) {
     var sheetId = initializeTracker();
-    // Move tracker into parent folder
     var trackerFile = DriveApp.getFileById(sheetId);
     parentFolder.addFile(trackerFile);
     DriveApp.getRootFolder().removeFile(trackerFile);
@@ -198,6 +207,23 @@ function onInitLabels(e) {
       CardService.newNotification().setText('✅ InvoiceFly labels created in Gmail!')
     )
     .build();
+}
+
+/**
+ * Check if a Drive file/folder still exists.
+ */
+function fileExists(fileId) {
+  try {
+    DriveApp.getFileById(fileId);
+    return true;
+  } catch (e) {
+    try {
+      DriveApp.getFolderById(fileId);
+      return true;
+    } catch (e2) {
+      return false;
+    }
+  }
 }
 
 /**
