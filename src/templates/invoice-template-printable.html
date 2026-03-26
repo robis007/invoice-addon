@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Invoice Template — InvoiceFly</title>
+  <style>
+    @page { size: A4; margin: 20mm; }
+    @media print { body { -webkit-print-color-adjust: exact; print-color-adjust: exact; } }
+
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    body {
+      font-family: 'Segoe UI', -apple-system, Helvetica, Arial, sans-serif;
+      color: #1E293B;
+      background: #fff;
+      max-width: 210mm;
+      margin: 0 auto;
+      padding: 40px 50px;
+      font-size: 13px;
+      line-height: 1.5;
+    }
+
+    /* Header */
+    .header {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding-bottom: 25px;
+      border-bottom: 3px solid #2563EB;
+      margin-bottom: 35px;
+    }
+    .brand h1 {
+      font-size: 32px;
+      font-weight: 800;
+      color: #2563EB;
+      letter-spacing: -0.5px;
+      margin-bottom: 2px;
+    }
+    .brand .tagline {
+      color: #94A3B8;
+      font-size: 11px;
+      letter-spacing: 0.5px;
+    }
+    .invoice-meta { text-align: right; }
+    .invoice-meta .number {
+      font-size: 20px;
+      font-weight: 700;
+      color: #1E293B;
+    }
+    .invoice-meta .date {
+      color: #64748B;
+      font-size: 12px;
+      margin-top: 3px;
+    }
+    .badge {
+      display: inline-block;
+      margin-top: 8px;
+      padding: 3px 14px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      background: #DBEAFE;
+      color: #2563EB;
+    }
+    .badge.paid { background: #D1FAE5; color: #059669; }
+    .badge.overdue { background: #FEE2E2; color: #DC2626; }
+
+    /* Parties */
+    .parties {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 40px;
+    }
+    .party { width: 45%; }
+    .party-label {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #94A3B8;
+      margin-bottom: 8px;
+    }
+    .party-name {
+      font-size: 15px;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+    .party-detail {
+      font-size: 12px;
+      color: #64748B;
+      line-height: 1.7;
+    }
+
+    /* Items */
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 25px;
+    }
+    thead th {
+      text-align: left;
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: #94A3B8;
+      padding: 10px 14px;
+      border-bottom: 2px solid #E2E8F0;
+    }
+    thead th.right { text-align: right; }
+    tbody td {
+      padding: 12px 14px;
+      border-bottom: 1px solid #F1F5F9;
+      vertical-align: top;
+    }
+    tbody td.right {
+      text-align: right;
+      font-variant-numeric: tabular-nums;
+    }
+    tbody tr:nth-child(even) { background: #F8FAFC; }
+    .item-name { font-weight: 500; }
+    .item-detail { font-size: 11px; color: #94A3B8; margin-top: 2px; }
+
+    /* Totals */
+    .totals {
+      display: flex;
+      justify-content: flex-end;
+      margin-bottom: 40px;
+    }
+    .totals-box { width: 260px; }
+    .totals-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 7px 0;
+      font-size: 12px;
+      color: #64748B;
+    }
+    .totals-row .val { color: #1E293B; font-variant-numeric: tabular-nums; }
+    .totals-sep { border-top: 1px solid #E2E8F0; margin: 4px 0; }
+    .totals-total {
+      display: flex;
+      justify-content: space-between;
+      padding: 12px 16px;
+      background: #2563EB;
+      border-radius: 8px;
+      margin-top: 6px;
+      color: #fff;
+    }
+    .totals-total .lbl { font-size: 13px; font-weight: 700; }
+    .totals-total .val { font-size: 17px; font-weight: 800; font-variant-numeric: tabular-nums; }
+
+    /* Footer sections */
+    .footer-cols {
+      display: flex;
+      gap: 40px;
+      margin-bottom: 35px;
+    }
+    .footer-col { flex: 1; }
+    .footer-col-title {
+      font-size: 9px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 2px;
+      color: #94A3B8;
+      margin-bottom: 8px;
+    }
+    .footer-col-body {
+      font-size: 12px;
+      color: #64748B;
+      line-height: 1.8;
+    }
+    .bank-row { display: flex; gap: 6px; }
+    .bank-row .lbl { font-weight: 600; color: #475569; min-width: 55px; }
+
+    /* Branding footer */
+    .powered {
+      text-align: center;
+      padding-top: 20px;
+      border-top: 1px solid #F1F5F9;
+      font-size: 9px;
+      color: #CBD5E1;
+      letter-spacing: 0.5px;
+    }
+  </style>
+</head>
+<body>
+
+  <!-- ─── HEADER ─── -->
+  <div class="header">
+    <div class="brand">
+      <h1>{{BUSINESS_NAME}}</h1>
+      <div class="tagline">{{BUSINESS_TAGLINE}}</div>
+    </div>
+    <div class="invoice-meta">
+      <div class="number">{{INVOICE_NUMBER}}</div>
+      <div class="date">Issued: {{DATE}}</div>
+      <div class="date">Due: {{DUE_DATE}}</div>
+      <span class="badge">{{STATUS}}</span>
+    </div>
+  </div>
+
+  <!-- ─── PARTIES ─── -->
+  <div class="parties">
+    <div class="party">
+      <div class="party-label">From</div>
+      <div class="party-name">{{BUSINESS_NAME}}</div>
+      <div class="party-detail">
+        {{BUSINESS_EMAIL}}<br>
+        {{BUSINESS_ADDRESS}}<br>
+        VAT: {{TAX_ID}}
+      </div>
+    </div>
+    <div class="party">
+      <div class="party-label">Bill To</div>
+      <div class="party-name">{{CLIENT_NAME}}</div>
+      <div class="party-detail">
+        {{CLIENT_EMAIL}}<br>
+        {{CLIENT_ADDRESS}}
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── ITEMS ─── -->
+  <table>
+    <thead>
+      <tr>
+        <th>Description</th>
+        <th class="right">Qty</th>
+        <th class="right">Unit Price</th>
+        <th class="right">Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{ITEMS_ROWS}}
+      <!--
+      Example row:
+      <tr>
+        <td>
+          <div class="item-name">Web Development</div>
+          <div class="item-detail">Landing page design &amp; build</div>
+        </td>
+        <td class="right">1</td>
+        <td class="right">EUR 1,500.00</td>
+        <td class="right">EUR 1,500.00</td>
+      </tr>
+      -->
+    </tbody>
+  </table>
+
+  <!-- ─── TOTALS ─── -->
+  <div class="totals">
+    <div class="totals-box">
+      <div class="totals-row">
+        <span>Subtotal</span>
+        <span class="val">{{CURRENCY}} {{SUBTOTAL}}</span>
+      </div>
+      <div class="totals-row">
+        <span>Tax ({{TAX_RATE}}%)</span>
+        <span class="val">{{CURRENCY}} {{TAX}}</span>
+      </div>
+      <div class="totals-sep"></div>
+      <div class="totals-total">
+        <span class="lbl">Total Due</span>
+        <span class="val">{{CURRENCY}} {{TOTAL}}</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- ─── PAYMENT & NOTES ─── -->
+  <div class="footer-cols">
+    <div class="footer-col">
+      <div class="footer-col-title">Payment Details</div>
+      <div class="footer-col-body">
+        <div class="bank-row"><span class="lbl">Bank:</span> <span>{{BANK_NAME}}</span></div>
+        <div class="bank-row"><span class="lbl">IBAN:</span> <span>{{IBAN}}</span></div>
+        <div class="bank-row"><span class="lbl">SWIFT:</span> <span>{{SWIFT}}</span></div>
+        <div class="bank-row"><span class="lbl">Terms:</span> <span>Net {{PAYMENT_TERMS}} days</span></div>
+      </div>
+    </div>
+    <div class="footer-col">
+      <div class="footer-col-title">Notes</div>
+      <div class="footer-col-body">{{NOTES}}</div>
+    </div>
+  </div>
+
+  <!-- ─── FOOTER ─── -->
+  <div class="powered">Generated by InvoiceFly · invoicefly.app</div>
+
+</body>
+</html>
