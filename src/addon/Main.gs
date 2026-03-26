@@ -6,8 +6,17 @@
 
 /**
  * Called when the add-on homepage is opened.
+ * Shows the dashboard if tracker exists, otherwise shows onboarding.
  */
 function onHomepage(e) {
+  var sheetId = PropertiesService.getScriptProperties().getProperty('TRACKER_SHEET_ID');
+
+  if (sheetId) {
+    // Show dashboard
+    return [buildDashboard()];
+  }
+
+  // Onboarding / quick actions
   var card = CardService.newCardBuilder()
     .setHeader(
       CardService.newCardHeader()
@@ -17,32 +26,46 @@ function onHomepage(e) {
     )
     .addSection(
       CardService.newCardSection()
+        .setHeader('Welcome! 👋')
+        .addWidget(
+          CardService.newTextParagraph()
+            .setText('Open any email and click "Parse & Extract" to create your first invoice. ' +
+                     'A tracker spreadsheet will be auto-created for you.')
+        )
+    )
+    .addSection(
+      CardService.newCardSection()
         .setHeader('Quick Actions')
         .addWidget(
           CardService.newTextButton()
-            .setText('📧 Parse Current Email')
-            .setOnClickAction(
-              CardService.newAction().setFunctionName('onParseEmail')
-            )
-        )
-        .addWidget(
-          CardService.newTextButton()
-            .setText('🧾 View Recent Invoices')
-            .setOnClickAction(
-              CardService.newAction().setFunctionName('onViewInvoices')
-            )
-        )
-        .addWidget(
-          CardService.newTextButton()
-            .setText('⚙️ Settings')
+            .setText('⚙️ Configure Settings')
             .setOnClickAction(
               CardService.newAction().setFunctionName('onSettings')
+            )
+        )
+        .addWidget(
+          CardService.newTextButton()
+            .setText('🏷️ Initialize Labels')
+            .setOnClickAction(
+              CardService.newAction().setFunctionName('onInitLabels')
             )
         )
     )
     .build();
 
   return [card];
+}
+
+/**
+ * Initialize labels and show confirmation.
+ */
+function onInitLabels(e) {
+  initializeLabels();
+  return CardService.newActionResponseBuilder()
+    .setNotification(
+      CardService.newNotification().setText('✅ InvoiceFly labels created in Gmail!')
+    )
+    .build();
 }
 
 /**
@@ -93,6 +116,15 @@ function onGmailMessageOpen(e) {
               CardService.newAction()
                 .setFunctionName('onQuickInvoice')
                 .setParameters({ messageId: messageId })
+            )
+        )
+        .addWidget(
+          CardService.newTextButton()
+            .setText('🔁 Check Recurring Pattern')
+            .setOnClickAction(
+              CardService.newAction()
+                .setFunctionName('onCheckRecurring')
+                .setParameters({ clientEmail: from.replace(/.*<([^>]+)>.*/, '$1') })
             )
         )
     )
